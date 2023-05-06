@@ -98,7 +98,7 @@ class Downloader: # Downloader selbsterklärend vgl. P04?
     def __init__(self, url):
         self.url = url
         self.cache_file = "data_cache.csv" #name von cache file
-        
+      
         
     def get_data(self):
         #wenn es nicht im cache ist oder mehr als 600 Sekunden (10 min) her ist-> daten neu holen
@@ -118,9 +118,7 @@ class Downloader: # Downloader selbsterklärend vgl. P04?
         print ("file path:", file_path)
         print ("data", data)
         return file_path
-
-    
-        
+         
     def download(self, timeout=60000):
         try:
             file_age = time.time() - os.path.getmtime(self.file_path)
