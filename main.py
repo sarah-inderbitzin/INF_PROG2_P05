@@ -22,6 +22,7 @@ import os.path
 import tkinter as tk
 from tkinter import messagebox
 import urllib.request as ur
+import csv
 #import tensorflow as tf?
 
 class TimestampConverter:
@@ -38,7 +39,7 @@ class TimestampConverter:
         return self.df # Ausgabe neues dataframe
 
 class Data:
-    def __init__(self, data):
+    def __init__(self, data): #realtive path --> \data_cache.csv
         self.file_path = data # Daten einlesen
     
     def data(self):
@@ -95,30 +96,40 @@ class Visualization(tk.Tk):
     def show(self):
         pass
 
-class Downloader: # Downloader selbsterklärend vgl. P04?
+class Downloader(): # Downloader selbsterklärend vgl. P04?
+    
     def __init__(self, url):
         self.url = url
         self.cache_file = "data_cache.csv" #name von cache file
+        self.file_path = 0
+        self.timeout = 600000
       
         
     def get_data(self):
+        #ziel --> daten runterladen und nur noch relativer pfad angeben also nur noch namen übergeben data_cache.csv
         #wenn es nicht im cache ist oder mehr als 600 Sekunden (10 min) her ist-> daten neu holen
-        if not os.path.isfile(self.cache_file) or time.time() - os.stat(self.cache_file).st_mtime > 600:
+        if not os.path.isfile(self.cache_file) or time.time() - os.stat(self.cache_file).st_mtime > self.timeout:
             print("\nLoading data from url.")
-            data = ur.urlretrieve(self.url, self.cache_file)
-            file_path = os.path.abspath(self.cache_file)
-            print ("file path:", file_path)
+            #data = ur.urlretrieve(self.url, self.cache_file)
+            self.file_path = os.path.abspath(self.cache_file)
+            print ("file path:", self.file_path)
+            response = requests.get(self.url)
+            
+            with open(self.file_path, 'wb') as f:
+                csvFile = csv.reader(f)
+                for lines in csvFile:
+                    print(lines)
+                #f.write(response.content)
+            print(f'Downloaded file: {self.file_path}')
+
         else:
             #datei wird aus cache geladen, read only
-            file_path = os.path.abspath(self.cache_file)
-            print ("file path from :", file_path)            
+            self.file_path = os.path.abspath(self.cache_file)
+            print ("file path :", self.file_path)            
             f = open(self.cache_file, 'r')
                 
-            data = f.read() #inhalt von dokument auslesen und zurückgeben
-        file_path = os.path.abspath(self.cache_file)
-        print ("file path:", file_path)
-        print ("data", data)
-        return file_path
+        print ("file path:", self.file_path)
+        return self.file_path
          
     def download(self, timeout=60000):
         try:
