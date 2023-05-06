@@ -20,6 +20,7 @@ import requests
 import os.path
 import tkinter as tk
 from tkinter import messagebox
+import urllib.request as ur
 #import tensorflow as tf?
 
 class TimestampConverter:
@@ -94,9 +95,31 @@ class Visualization(tk.Tk):
         pass
 
 class Downloader: # Downloader selbsterklärend vgl. P04?
-    def __init__(self, url, path):
-        self.url = url 
-        self.file_path = path
+    def __init__(self, url):
+        self.url = url
+        self.cache_file = "data_cache.csv" #name von cache file
+        
+        
+    def get_data(self):
+        #wenn es nicht im cache ist oder mehr als 600 Sekunden (10 min) her ist-> daten neu holen
+        if not os.path.isfile(self.cache_file) or time.time() - os.stat(self.cache_file).st_mtime > 600:
+            print("\nLoading data from url.")
+            data = ur.urlretrieve(self.url, self.cache_file)
+            file_path = os.path.abspath(self.cache_file)
+            print ("file path:", file_path)
+        else:
+            #datei wird aus cache geladen, read only
+            file_path = os.path.abspath(self.cache_file)
+            print ("file path from :", file_path)            
+            f = open(self.cache_file, 'r')
+                
+            data = f.read() #inhalt von dokument auslesen und zurückgeben
+        file_path = os.path.abspath(self.cache_file)
+        print ("file path:", file_path)
+        print ("data", data)
+        return file_path
+
+    
         
     def download(self, timeout=60000):
         try:
@@ -118,10 +141,12 @@ if __name__ == '__main__':
     # Alle variablen die man braucht
     url = 'https://data.stadt-zuerich.ch/dataset/vbz_fahrzeiten_ogd/download/Fahrzeiten_SOLL_IST_20230319_20230325.csv'
     path = r'C:\Users\fadri\Downloads\Fahrzeiten_SOLL_IST_20230319_20230325.csv'
-    downloader = Downloader(url, path)
-    data = downloader.download()
-    
+    downloader = Downloader(url)
+    downloader.get_data()
+    #data = downloader.download()
+    """
     data_path = Data(data)
     dataframe = data_path.data()
     calculator = Calculator(dataframe)
     calculator.calculate()
+    """
